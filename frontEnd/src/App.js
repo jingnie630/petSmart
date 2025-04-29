@@ -7,15 +7,7 @@ import Layout from "./layout/Layout";
 import { Amplify } from 'aws-amplify';
 import Product from "./pages/product/product";
 import Cart from "./pages/cart/Cart";
-
-
-// Key                 CognitoUserPoolClientId
-// Description         Cognito User Pool Client ID
-// Value               6ukpmp29fm4h6hpa9fq17vuje4
-
-// Key                 CognitoUserPoolId
-// Description         Cognito User Pool ID
-// Value               us-west-2_fXtfhYTec
+import { CartProvider } from "./context/CartContext";
 
 Amplify.configure({
   Auth: {
@@ -27,20 +19,20 @@ Amplify.configure({
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/register" element = {<Register />}/>
-      <Route path="/layout" element = {<Layout />}/>
-      
-      <Route path="/" element={<Layout />}>
-        <Route path="/dashboard" element = {<Dashboard />}/>
-        <Route path="/Profile" element = {<Profile />}/>
-        <Route path="/product" element = {<Product />}/>
-        <Route path="/cart" element = {<Cart />}/>
-      </Route>
-
-      {/* <Route path="*" element={<NotFound />} />  */}
-    </Routes>
+    <CartProvider>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element = {<Register />}/>
+        <Route path="/layout" element = {<Layout />}/>
+        
+        <Route path="/" element={<Layout />}>
+          <Route path="/dashboard" element = {<Dashboard />}/>
+          <Route path="/Profile" element = {<Profile />}/>
+          <Route path="/product" element = {<Product />}/>
+          <Route path="/cart" element = {<Cart />}/>
+        </Route>
+      </Routes>
+    </CartProvider>
   );
 }
 

@@ -1,14 +1,95 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import checkAuth from "../../Auth";
+import { useCart } from "../../context/CartContext";
+
+const ProductCard = ({ product, onAddToCart }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  
+  const handleAddToCart = () => {
+    setIsAdding(true);
+    onAddToCart(product);
+    
+    // Reset button state after 1 second
+    setTimeout(() => {
+      setIsAdding(false);
+    }, 1000);
+  };
+  
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      <Link to="/product">
+        <div className="h-40 bg-gray-100 flex items-center justify-center">
+          {product.icon === "bone" && <i className="fas fa-bone text-gray-400 text-3xl"></i>}
+          {product.icon === "fish" && <i className="fas fa-fish text-gray-400 text-3xl"></i>}
+          {product.icon === "cat" && <i className="fas fa-cat text-gray-400 text-3xl"></i>}
+        </div>
+      </Link>
+      <div className="p-4">
+        <h4 className="font-bold text-gray-800">{product.name}</h4>
+        <p className="text-gray-600 text-sm mb-2">{product.description}</p>
+        <div className="flex justify-between items-center">
+          <span className="font-bold text-gray-800">${product.price.toFixed(2)}</span>
+          <button 
+            className={`${
+              isAdding ? 'bg-green-600' : 'bg-indigo-600'
+            } text-white px-3 py-1 text-sm rounded hover:bg-indigo-700 flex items-center justify-center min-w-[90px]`}
+            onClick={handleAddToCart}
+            disabled={isAdding}
+          >
+            {isAdding ? (
+              <>
+                <i className="fas fa-check mr-1"></i> Added
+              </>
+            ) : (
+              'Add to Cart'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard = () => {
-  
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const [notification, setNotification] = useState(null);
+  
+  // Sample product data (in a real app, this would come from an API)
+  const recommendedProducts = [
+    {
+      id: "premium-dog-food",
+      name: "Premium Dog Food",
+      description: "Natural ingredients",
+      price: 24.99,
+      icon: "bone"
+    },
+    {
+      id: "tuna-cat-bites",
+      name: "Tuna Cat Bites",
+      description: "Omega-rich treats",
+      price: 8.49,
+      icon: "fish"
+    },
+    {
+      id: "dental-chews",
+      name: "Dental Chews",
+      description: "Cleans teeth naturally",
+      price: 12.00,
+      icon: "bone"
+    },
+    {
+      id: "catnip-play-pack",
+      name: "Catnip Play Pack",
+      description: "Stimulating toy set",
+      price: 10.99,
+      icon: "cat"
+    }
+  ];
 
+  // Authentication check
   useEffect(() => {
-
     const authCheck = async () => {
       const email = await checkAuth((err) => {
         console.error("❌ Not authenticated:", err);
@@ -18,10 +99,42 @@ const Dashboard = () => {
     };
 
     authCheck();
-  }, []);
+  }, [navigate]);
+
+  // Handle add to cart from dashboard
+  const handleAddToCart = (product) => {
+    // Create cart item
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      size: product.id.includes('cat') ? "Standard" : "15 lb", // Default size
+      quantity: 1,
+      type: "single",
+      image: product.icon
+    };
+    
+    // Add to cart
+    addToCart(cartItem);
+    
+    // Show notification
+    setNotification(`${product.name} added to cart!`);
+    
+    // Clear notification after 3 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Notification */}
+      {notification && (
+        <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50">
+          {notification}
+        </div>
+      )}
+      
       {/* Welcome Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -79,84 +192,13 @@ const Dashboard = () => {
       <div className="mb-12">
         <h3 className="text-xl font-bold mb-4">Recommended For Your Pets</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Product Card 1 */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <Link to="/product">
-            <div className="h-40 bg-gray-100 flex items-center justify-center">
-              <i className="fas fa-bone text-gray-400 text-3xl"></i>
-            </div>
-          </Link>
-            <div className="p-4">
-              <h4 className="font-bold text-gray-800">Premium Dog Food</h4>
-              <p className="text-gray-600 text-sm mb-2">Natural ingredients</p>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-800">$24.99</span>
-                <button className="bg-indigo-600 text-white px-3 py-1 text-sm rounded hover:bg-indigo-700">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Card 2 */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <Link to="/product">
-            <div className="h-40 bg-gray-100 flex items-center justify-center">
-              <i className="fas fa-fish text-gray-400 text-3xl"></i>
-            </div>
-          </Link>
-            
-            <div className="p-4">
-              <h4 className="font-bold text-gray-800">Tuna Cat Bites</h4>
-              <p className="text-gray-600 text-sm mb-2">Omega-rich treats</p>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-800">$8.49</span>
-                <button className="bg-indigo-600 text-white px-3 py-1 text-sm rounded hover:bg-indigo-700">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Card 3 */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <Link to="/product">
-            <div className="h-40 bg-gray-100 flex items-center justify-center">
-              <i className="fas fa-bone text-gray-400 text-3xl"></i>
-            </div>
-          </Link>
-           
-            <div className="p-4">
-              <h4 className="font-bold text-gray-800">Dental Chews</h4>
-              <p className="text-gray-600 text-sm mb-2">Cleans teeth naturally</p>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-800">$12.00</span>
-                <button className="bg-indigo-600 text-white px-3 py-1 text-sm rounded hover:bg-indigo-700">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Product Card 4 */}
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <Link to="/product">
-            <div className="h-40 bg-gray-100 flex items-center justify-center">
-              <i className="fas fa-cat text-gray-400 text-3xl"></i>
-            </div>
-          </Link>
-           
-            <div className="p-4">
-              <h4 className="font-bold text-gray-800">Catnip Play Pack</h4>
-              <p className="text-gray-600 text-sm mb-2">Stimulating toy set</p>
-              <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-800">$10.99</span>
-                <button className="bg-indigo-600 text-white px-3 py-1 text-sm rounded hover:bg-indigo-700">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </div>
+          {recommendedProducts.map((product) => (
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              onAddToCart={handleAddToCart} 
+            />
+          ))}
         </div>
       </div>
 
