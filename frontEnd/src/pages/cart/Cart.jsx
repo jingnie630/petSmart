@@ -110,6 +110,11 @@ const Cart = () => {
     authCheck();
   }, [navigate]);
 
+  // Handle proceeding to checkout
+  const handleCheckout = () => {
+    navigate('/checkout');
+  };
+
   return (
     <div className="max-w-5xl mx-auto mt-16 px-4">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -201,7 +206,10 @@ const Cart = () => {
                 </div>
               </div>
 
-              <button className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-200 mb-3">
+              <button 
+                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-200 mb-3"
+                onClick={handleCheckout}
+              >
                 Proceed to Checkout
               </button>
 
